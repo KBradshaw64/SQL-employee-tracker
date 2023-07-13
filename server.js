@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const fs = require('fs')
 const util = require('util');
 const { async } = require('rxjs');
 
@@ -24,8 +25,8 @@ const questions = [
     }
 ];
 
-function menu(){
-    inquirer.prompt(questions)
+async function menu(){
+    await inquirer.prompt(questions)
     .then(response => {
         if (response.directory === 'View All Employees'){
             viewAllEmployees();
@@ -68,7 +69,7 @@ async function viewAllEmployees(){
 async function addEmployee(){
     const roles = await db.query(`select id as value, title as name from emp_role`)
     const employees = await db.query(`select id as value, concat(first_name, " ", last_name) as name from employee`)
-    const responses = await inquirer.promt([
+    const responses = await inquirer.prompt([
         {
             type: 'input',
             name: 'firstName',
@@ -91,7 +92,7 @@ async function addEmployee(){
             message: "Who is the employee's manager?",
             choices: employees
         }
-    ])
+    ]);
     await db.query(`insert into employee(first_name, last_name, role_id, manager_id) values(?,?,?,?)`,[responses.firstName, responses.lastName, responses.roleId, responses.managerId])
     console.log('Success')
     menu();
