@@ -3,13 +3,17 @@ const inquirer = require('inquirer');
 const fs = require('fs')
 const util = require('util');
 const { async } = require('rxjs');
+const Sequelize = require('sequelize');
+require('dotenv').config();
 
+
+//testing .env security
 const db = mysql.createConnection(
     {
         host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'employee_db'
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
     },
     console.log(`Connected to the employee_db database.`)
 );
@@ -43,7 +47,8 @@ async function menu(){
         } else if (response.directory === 'Add Department'){
             addDepartment();
         } else if (response.directory === 'Quit'){
-            db.close();
+            db.end();
+            console.log('Bye!');
         };
     });
 };
