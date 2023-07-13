@@ -97,4 +97,81 @@ async function addEmployee(){
     menu();
 };
 
-async function 
+async function updateEmpRole(){
+    const roles = await db.query(`select id as value, title as name from emp_role`);
+    const departments = await db.query(`selct id as value, name as name from departments`);
+    //maybe cant use await with inquirer.prompt
+    const responses = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'roleId',
+            message: "Which role would you like to update?",
+            choices: roles
+        },
+        {
+            //look for integer option
+            type: 'number',
+            name: 'newSal',
+            message: "What is the salary of this role?"
+        },
+        {
+            type: 'list',
+            name: 'depId',
+            message: 'What department is this role under?',
+            choices: departments
+        },
+    ])
+    //look up how to update multiple values in the same command
+    await db.query(`update emp_role set salary = ?, department_id = ? where id = ?;`, [responses.newSal, responses.depId, responses.roleId])
+    menu();
+};
+
+async function viewAllRole(){
+    const sql = `select * from emp_role`
+    const roles = await db.query(sql)
+    console.table(roles);
+    menu();
+};
+
+async function addRole(){
+    const departments = await db.query(`selct id as value, name as name from departments`);
+    const responses = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'title',
+            message: "What is the title of the new role?"
+        },
+        {
+            type: 'number',
+            name: 'salary',
+            message: "What is the salary for the new role?"
+        },
+        {
+            type: 'list',
+            name: 'department',
+            message: "What department in the new role under?",
+            choices: departments
+        }
+    ]);
+    await db.query(`insert into emp_role(title, salary, department_id) values(?,?,?)`, [responses.title, responses.salary, responses.department])
+    menu();
+}
+
+async function viewAllDep(){
+    const sql = `select * from departments`
+    const departments = await db.query(sql);
+    console.table(departments);
+    menu();
+};
+
+async function addDepartment(){
+    const responses = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'name',
+            message: "What is the name of the new Department?"
+        },
+    ]);
+    await db.query(`inset into departments(name) values(?)`, [responses.name])
+    menu();
+};
