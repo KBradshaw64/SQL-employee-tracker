@@ -25,7 +25,7 @@ const questions = [
 ];
 
 function menu(){
-    inquirer.promt(questions)
+    inquirer.prompt(questions)
     .then(response => {
         if (response.directory === 'View All Employees'){
             viewAllEmployees();
@@ -41,7 +41,7 @@ function menu(){
             viewAllDep();
         } else if (response.directory === 'Add Department'){
             addDepartment();
-        } else {
+        } else if (response.directory === 'Quit'){
             db.close();
         };
     });
