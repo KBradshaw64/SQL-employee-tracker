@@ -71,7 +71,7 @@ async function viewAllEmployees(){
     menu();
 };
 
-async function whoManager(){
+async function whoManager(firstName, lastName, roleId){
     const employees = await db.query(`select id as value, concat(first_name, " ", last_name) as name from employee`)
     const question = [
         {
@@ -81,11 +81,13 @@ async function whoManager(){
         choices: employees
         }
     ]
-    await inquirer.prompt(question)
+    inquirer.prompt(question)
     .then(response => {
-        db.query(`insert into employee(manager_id) value(?)`, [response.managerId])
+        db.query(`insert into employee(first_name, last_name, role_id, manager_id) values(?,?,?,?)`, [firstName, lastName, roleId, response.managerId], function(){
+            //had to make this one callback based in order to execute properly
+            menu();
+        })
     })
-    menu();
 };
 
 async function addEmp(){
@@ -109,18 +111,18 @@ async function addEmp(){
         },
         {
             type: 'list',
-            name: 'manager_yn',
+            name: 'managerYn',
             message: 'Does the employee have a manager?',
             choices: ['Yes', 'No']
         }
     ];
     await inquirer.prompt(questions)
-    .then(response => {
-        if (response.manager_yn === "Yes"){
-            db.query(`insert into employee(first_name, last_name, role_id) values(?,?,?)`, [response.firstName, response.lastName, response.roleId])
-            whoManager();
-        } else {
-            menu();
+    .then(responses => {
+        if (responses.managerYn === "Yes"){
+            whoManager(responses.firstName, responses.lastName, responses.roleId);
+        } else { 
+            db.query(`insert into employee(first_name, last_name, role_id) values(?,?,?)`, [responses.firstName, responses.lastName, responses.roleId])//save employee data
+        menu();
         }
     })
 };
