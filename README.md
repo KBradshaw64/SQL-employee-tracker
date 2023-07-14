@@ -14,7 +14,7 @@
 
   ## Usage
 
-  Please run npm i in the integrated console before use. Once you run the file you will stay in the options loop and executing options until you use the "quit" option. 
+  Please run npm i in the integrated console before use. Once you run the file you will stay in the options loop and executing options until you use the "quit" option. Check out https://drive.google.com/file/d/109VCPOEZSS_tY40XukWyt6o-zOgSOSq2/view for a video demonstration of the application.
 
   ## Credits
 
