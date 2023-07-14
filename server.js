@@ -29,43 +29,6 @@ const questions = [
     }
 ];
 
-async function addEmp(){
-    const roles = await db.query(`select id as value, title as name from emp_role`)
-    const questions = [
-        {
-            type: 'input',
-            name: 'firstName',
-            message: "What is the employee's first name?"
-        },
-        {
-            type: 'input',
-            name: 'lastName',
-            message: "What is the employee's last name?"
-        },
-        {
-            type: 'list',
-            name: 'roleId',
-            message: "What is the employee's role?",
-            choices: roles
-        },
-        {
-            type: 'list',
-            name: 'manager_yn',
-            message: 'Does the employee have a manager?',
-            Choices: ['Yes', 'No']
-        }
-    ];
-    await inquirer.prompt(questions)
-    .then(response => {
-        if (response.manager_yn === "Yes"){
-            db.query(`insert into employee(first_name, last_name, role_id) values(?,?,?)`, [response.firstName, response.lastName, response.roleId])
-            whoManager();
-        } else {
-            menu();
-        }
-    })
-};
-
 async function menu(){
     await inquirer.prompt(questions)
     .then(response => {
