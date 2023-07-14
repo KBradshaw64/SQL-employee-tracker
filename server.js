@@ -20,6 +20,7 @@ const db = mysql.createConnection(
 
 db.query = util.promisify(db.query);
 
+
 const questions = [
     {
         type: 'list',
@@ -53,7 +54,13 @@ async function menu(){
     });
 };
 
-menu();
+db.query(`source schema.sql`, console.log(`sourced`), function(){
+    db.query(`source seeds.sql`, console.log(`seeded`), function(){
+        menu();
+    })
+});
+
+//menu();
 
 async function viewAllEmployees(){
     const sql = `SELECT employee.id, employee.first_name AS "first name", employee.last_name 
