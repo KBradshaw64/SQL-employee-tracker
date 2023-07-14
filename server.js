@@ -29,13 +29,50 @@ const questions = [
     }
 ];
 
+async function addEmp(){
+    const roles = await db.query(`select id as value, title as name from emp_role`)
+    const questions = [
+        {
+            type: 'input',
+            name: 'firstName',
+            message: "What is the employee's first name?"
+        },
+        {
+            type: 'input',
+            name: 'lastName',
+            message: "What is the employee's last name?"
+        },
+        {
+            type: 'list',
+            name: 'roleId',
+            message: "What is the employee's role?",
+            choices: roles
+        },
+        {
+            type: 'list',
+            name: 'manager_yn',
+            message: 'Does the employee have a manager?',
+            Choices: ['Yes', 'No']
+        }
+    ];
+    await inquirer.prompt(questions)
+    .then(response => {
+        if (response.manager_yn === "Yes"){
+            db.query(`insert into employee(first_name, last_name, role_id) values(?,?,?)`, [response.firstName, response.lastName, response.roleId])
+            whoManager();
+        } else {
+            menu();
+        }
+    })
+};
+
 async function menu(){
     await inquirer.prompt(questions)
     .then(response => {
         if (response.directory === 'View All Employees'){
             viewAllEmployees();
         } else if (response.directory === 'Add Employee'){
-            addEmployee();
+            addEmp();
         } else if (response.directory === 'Update Employee Role'){
             updateEmpRole();
         } else if (response.directory === 'View All Roles'){
@@ -71,10 +108,26 @@ async function viewAllEmployees(){
     menu();
 };
 
-async function addEmployee(){
-    const roles = await db.query(`select id as value, title as name from emp_role`)
+async function whoManager(){
     const employees = await db.query(`select id as value, concat(first_name, " ", last_name) as name from employee`)
-    const responses = await inquirer.prompt([
+    const question = [
+        {
+        type: 'list',
+        name: 'managerId',
+        message: "Who is the employee's manager?",
+        choices: employees
+        }
+    ]
+    await inquirer.prompt(question)
+    .then(response => {
+        db.query(`insert into employee(manager_id) value(?)`, [response.managerId])
+    })
+    menu();
+};
+
+async function addEmp(){
+    const roles = await db.query(`select id as value, title as name from emp_role`)
+    const questions = [
         {
             type: 'input',
             name: 'firstName',
@@ -93,32 +146,37 @@ async function addEmployee(){
         },
         {
             type: 'list',
-            name: 'managerId',
-            message: "Who is the employee's manager?",
-            choices: employees
+            name: 'manager_yn',
+            message: 'Does the employee have a manager?',
+            choices: ['Yes', 'No']
         }
-    ]);
-    await db.query(`insert into employee(first_name, last_name, role_id, manager_id) values(?,?,?,?)`,[responses.firstName, responses.lastName, responses.roleId, responses.managerId])
-    console.log('Success')
-    menu();
+    ];
+    await inquirer.prompt(questions)
+    .then(response => {
+        if (response.manager_yn === "Yes"){
+            db.query(`insert into employee(first_name, last_name, role_id) values(?,?,?)`, [response.firstName, response.lastName, response.roleId])
+            whoManager();
+        } else {
+            menu();
+        }
+    })
 };
 
 async function updateEmpRole(){
     const roles = await db.query(`select id as value, title as name from emp_role`);
-    const departments = await db.query(`selct id as value, name as name from departments`);
+    const departments = await db.query(`select id as value, name as name from departments`);
     //maybe cant use await with inquirer.prompt
     const responses = await inquirer.prompt([
+        {
+            type: 'number',
+            name: 'newSal',
+            message: "What is the salary of this role?"
+        },
         {
             type: 'list',
             name: 'roleId',
             message: "Which role would you like to update?",
             choices: roles
-        },
-        {
-            //look for integer option
-            type: 'number',
-            name: 'newSal',
-            message: "What is the salary of this role?"
         },
         {
             type: 'list',
@@ -140,7 +198,7 @@ async function viewAllRole(){
 };
 
 async function addRole(){
-    const departments = await db.query(`selct id as value, name as name from departments`);
+    const departments = await db.query(`select id as value, name as name from departments;`);
     const responses = await inquirer.prompt([
         {
             type: 'input',
@@ -159,7 +217,8 @@ async function addRole(){
             choices: departments
         }
     ]);
-    await db.query(`insert into emp_role(title, salary, department_id) values(?,?,?)`, [responses.title, responses.salary, responses.department])
+    await db.query(`insert into emp_role(title, salary, department_id) values(?,?,?)`, [responses.title, responses.salary, responses.department]);
+    console.log('Success!');
     menu();
 }
 
@@ -178,6 +237,47 @@ async function addDepartment(){
             message: "What is the name of the new Department?"
         },
     ]);
-    await db.query(`inset into departments(name) values(?)`, [responses.name])
+    await db.query(`insert into departments(name) values(?)`, [responses.name]);
+    console.log('Success!');
     menu();
 };
+
+
+
+
+
+
+
+//original version of the add employee function:
+
+// async function addEmployee(){
+//     const roles = await db.query(`select id as value, title as name from emp_role`)
+//     const employees = await db.query(`select id as value, concat(first_name, " ", last_name) as name from employee`)
+//     const responses = await inquirer.prompt([
+//         {
+//             type: 'input',
+//             name: 'firstName',
+//             message: "What is the employee's first name?"
+//         },
+//         {
+//             type: 'input',
+//             name: 'lastName',
+//             message: "What is the employee's last name?"
+//         },
+//         {
+//             type: 'list',
+//             name: 'roleId',
+//             message: "What is the employee's role?",
+//             choices: roles
+//         },
+//         {
+//             type: 'list',
+//             name: 'managerId',
+//             message: "Who is the employee's manager?",
+//             choices: employees
+//         }
+//     ]);
+//     await db.query(`insert into employee(first_name, last_name, role_id, manager_id) values(?,?,?,?)`,[responses.firstName, responses.lastName, responses.roleId, responses.managerId])
+//     console.log('Success')
+//     menu();
+// };
